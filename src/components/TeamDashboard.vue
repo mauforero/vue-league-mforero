@@ -4,22 +4,35 @@
         <div class="grid grid-flow-row sm:grid-flow-col gap-4 max-w-md">
           <select name="teams" id="teams" v-model="currentTeam">
             <option :value="null">Select a team</option>
-            <option v-for="(team, index) in teams" :key="index" :value="team">
+            <option v-for="(team, index) in teams" :key="index" :value="{ key: index, ...team }">
               {{ team.name }}
             </option>
           </select>
           <input 
             type="text" 
-            name="newTeam" 
-            id="newTeam" 
-            placeholder="New Team"
-            v-model="newTeam" />
+            name="teamName" 
+            id="teamName" 
+            placeholder="Team Name"
+            v-model="teamName" />
           <input 
             type="button" 
             value="Add Team" 
             @click="addTeam" 
-            :disabled="newTeam.length === 0" 
-            :class="['btn', { 'btn-disabled': newTeam.length === 0 }]" />
+            :disabled="teamName.length === 0" 
+            :class="['btn', { 'btn-disabled': teamName.length === 0 }]" />
+          <input 
+            type="button" 
+            value="Change Name" 
+            v-if="!!currentTeam" 
+            @click="changeTeamName" 
+            :disabled="teamName.length === 0" 
+            :class="['btn', { 'btn-disabled': teamName.length === 0 }]" />
+          <input 
+            type="button" 
+            value="Delete Team" 
+            v-if="!!currentTeam" 
+            @click="deleteTeam" 
+            class="btn">
         </div>
 
       </div>
@@ -86,7 +99,7 @@ export default {
       ],
       currentTeam: null,
       timezones:[],
-      newTeam: "",
+      teamName: "",
       newMember: "",
       selectedTimezone: ""
     }
@@ -96,13 +109,11 @@ export default {
   },
   methods: {
     addTeam: function() {
-      if (this.newTeam.length) {
-        this.teams.push({
-          name: this.newTeam,
-          members: []
-        });
-        this.newTeam = "";
-      }
+      this.teams.push({
+        name: this.teamName,
+        members: []
+      });
+      this.teamName = "";
     },
     addMember: function() {
       if (this.newMember.length && this.selectedTimezone.length) {
@@ -113,6 +124,14 @@ export default {
         this.newMember = "";
         this.selectedTimezone = "";
       }
+    },
+    changeTeamName: function() {
+      this.currentTeam.name = this.teamName;
+      this.teamName = "";
+    },
+    deleteTeam: function() {
+      this.teams.splice(this.currentTeam.key, 1);
+      this.currentTeam = null;
     }
   },
   mounted() {
